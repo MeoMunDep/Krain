@@ -5,63 +5,44 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' 
 
-print_green() {
-    echo -e "${GREEN}$1${NC}"
-}
-
-print_yellow() {
-    echo -e "${YELLOW}$1${NC}"
-}
-
-print_red() {
-    echo -e "${RED}$1${NC}"
-}
+print_green() { echo -e "${GREEN}$1${NC}"; }
+print_yellow() { echo -e "${YELLOW}$1${NC}"; }
+print_red() { echo -e "${RED}$1${NC}"; }
 
 chmod +x "$0"
 
-if [ -d "../node_modules" ]; then
-    print_green "Found node_modules in parent directory"
-    MODULES_DIR=".."
-else
-    print_green "Using current directory for node_modules"
-    MODULES_DIR="."
-fi
+check_python() {
+    if ! command -v python3 &> /dev/null; then
+        print_red "Python is not installed!"
+        print_yellow "Please install Python 3.11.9 from your package manager or https://www.python.org/downloads/"
+        exit 1
+    fi
+}
 
 create_default_configs() {
     cat > configs.json << EOL
 {
-    "timeZone": "en-US",
-    "rotateProxy": false,
-    "skipInvalidProxy": false,
-    "proxyRotationInterval": 2,
-    "delayEachAccount": [5, 8],
-    "timeToRestartAllAccounts": 300,
-    "howManyAccountsRunInOneTime": 10,
-    "doTasks": true,
-    "playGames": true,
-    "referralCode": ""
+  "timeZone": "en-US",
+  "rotateProxy": false,
+  "skipInvalidProxy": false,
+  "proxyRotationInterval": 2,
+  "delayEachAccount": [5, 8],
+  "timeToRestartAllAccounts": 300,
+  "howManyAccountsRunInOneTime": 1,
+  "referralCode": "X3JBFG"
 }
 EOL
 }
 
-check_configs() {
-    if ! node -e "const cfg=require('./configs.json');if(typeof cfg.howManyAccountsRunInOneTime !== 'number' || cfg.howManyAccountsRunInOneTime < 1) throw new Error('Invalid config');" 2>/dev/null; then
-        print_red "Invalid configuration detected. Resetting to default values..."
-        create_default_configs
-        print_green "Configuration reset completed."
-    fi
-}
-
 while true; do
     clear
-    echo "============================================================================"
-    echo "    name BOT SETUP AND RUN SCRIPT"
-    echo "============================================================================"
+    echo "==============================================================="
+    echo "    Krain BOT SETUP AND RUN SCRIPT by @MeoMunDep"
+    echo "==============================================================="
     echo
     echo "Current directory: $(pwd)"
-    echo "Node modules directory: $MODULES_DIR/node_modules"
     echo
-    echo "1. Install/Update Node.js Dependencies"
+    echo "1. Install/Update Python Dependencies"
     echo "2. Create/Edit Configuration Files"
     echo "3. Run the Bot"
     echo "4. Exit"
@@ -71,10 +52,13 @@ while true; do
     case $choice in
         1)
             clear
-            print_yellow "Installing/Updating Node.js dependencies..."
-            cd "$MODULES_DIR"
-            npm install user-agents axios colors p-limit https-proxy-agent socks-proxy-agent crypto-js ws uuid xlsx readline-sync
-            cd - > /dev/null
+            print_yellow "Checking Python installation..."
+            check_python
+            
+            print_yellow "Installing/Updating Python dependencies..."
+            python3 -m pip install --upgrade pip
+            python3 -m pip install aiohttp requests cloudscraper pycryptodome fake-useragent aiohttp-proxy colorama
+            
             print_green "Dependencies installation completed!"
             read -p "Press Enter to continue..."
             ;;
@@ -86,8 +70,6 @@ while true; do
                 create_default_configs
                 print_green "Created configs.json with default values"
             fi
-
-            check_configs
 
             for file in datas.txt wallets.txt proxies.txt; do
                 if [ ! -f "$file" ]; then
@@ -102,20 +84,17 @@ while true; do
             ;;
         3)
             clear
-            print_yellow "Checking configuration before starting..."
-            if ! check_configs; then
-                print_red "Error: Invalid configuration detected. Please run option 2 to fix configuration."
+            print_yellow "Checking Python and configuration..."
+            check_python
+
+            if [ ! -f bot.py ]; then
+                print_red "Error: bot.py not found in current directory!"
                 read -p "Press Enter to continue..."
                 continue
             fi
 
             print_green "Starting the bot..."
-            if [ -d "../node_modules" ]; then
-                print_green "Using node_modules from parent directory"
-            else
-                print_green "Using node_modules from current directory"
-            fi
-            node bot
+            cd dist && python bot.py
             read -p "Press Enter to continue..."
             ;;
         4)
