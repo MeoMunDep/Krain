@@ -1,26 +1,16 @@
 @echo off
-title name Bot
+title Krain Bot Setup and Run Script by @MeoMunDep
 color 0A
-
-cd ..
-if exist node_modules (
-    echo Found node_modules in parent directory
-    cd %~dp0
-) else (
-    cd %~dp0
-    echo node_modules not found in parent directory
-)
 
 :MENU
 cls
 echo =================================================================
-echo    name BOT SETUP AND RUN SCRIPT
+echo    Krain BOT SETUP AND RUN SCRIPT by @MeoMunDep
 echo =================================================================
 echo.
 echo Current directory: %CD%
-echo Parent node_modules: %~dp0..\node_modules
 echo.
-echo 1. Install/Update Node.js Dependencies
+echo 1. Install/Update Python Dependencies
 echo 2. Create/Edit Configuration Files
 echo 3. Run the Bot
 echo 4. Exit
@@ -34,18 +24,20 @@ if "%choice%"=="4" goto EXIT
 
 :INSTALL
 cls
-echo Checking node_modules location...
-if exist "..\node_modules" (
-    cd ..
-    echo Installing/Updating dependencies in parent directory...
-    npm install user-agents axios colors p-limit https-proxy-agent socks-proxy-agent crypto-js ws uuid xlsx readline-sync
-    cd %~dp0
-) else (
-    echo Installing dependencies in current directory...
-    npm install user-agents axios colors p-limit https-proxy-agent socks-proxy-agent crypto-js ws uuid xlsx readline-sync
+echo Checking Python installation...
+python --version > nul 2>&1
+if errorlevel 1 (
+    echo Python is not installed or not in PATH
+    echo Please download Python 3.11.9 from: https://www.python.org/downloads/
+    pause
+    goto MENU
 )
+
+echo Installing/Updating Python dependencies...
+python -m pip install --upgrade pip
+pip install aiohttp requests cloudscraper pycryptodome fake-useragent aiohttp-proxy colorama
 echo.
-echo Dependencies installation completed!
+echo Dependencies installed successfully!
 pause
 goto MENU
 
@@ -53,21 +45,7 @@ goto MENU
 cls
 echo Creating configuration files...
 
-if not exist configs.json (
-    echo {> configs.json
-    echo   "timeZone": "en-US",>> configs.json
-    echo   "rotateProxy": false,>> configs.json
-    echo   "skipInvalidProxy": false,>> configs.json
-    echo   "proxyRotationInterval": 2,>> configs.json
-    echo   "delayEachAccount": [5, 8],>> configs.json
-    echo   "timeToRestartAllAccounts": 300,>> configs.json
-    echo   "howManyAccountsRunInOneTime": 100,>> configs.json
-    echo   "doTasks": true,>> configs.json
-    echo   "playGames": true,>> configs.json
-    echo   "referralCode": "">> configs.json
-    echo }>> configs.json
-    echo Created configs.json
-)
+
 
 if not exist datas.txt (
     type nul > datas.txt
@@ -91,13 +69,22 @@ goto MENU
 
 :RUN
 cls
-echo Starting the bot...
-if exist "..\node_modules" (
-    echo Using node_modules from parent directory
-) else (
-    echo Using node_modules from current directory
+echo Checking Python and configuration...
+python --version > nul 2>&1
+if errorlevel 1 (
+    echo Python is not installed or not in PATH
+    pause
+    goto MENU
 )
-node bot
+
+if not exist bot.py (
+    echo Error: bot.py not found in current directory!
+    pause
+    goto MENU
+)
+
+echo Starting the bot...
+cd dist && python bot.py
 pause
 goto MENU
 
