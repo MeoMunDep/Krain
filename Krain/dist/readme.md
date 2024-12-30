@@ -24,7 +24,7 @@ Before running the bot, make sure you have the following installed:
 - **Python** (Version: `3.11.9`)
 - **pip** (Version: `24.3.1`)
 
-Download Node.js and npm here: [Download Link](https://t.me/KeoAirDropFreeNe/257/2627).
+Download Python and pip here: [Download Link](https://t.me/KeoAirDropFreeNe/257/2627).
 
 ---
 
